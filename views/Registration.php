@@ -35,9 +35,9 @@ include 'header.php';
                         </tr>     
                                 
 
-                        
                      </table>
                 </form>
+                <p style="margin-top: 15px;">Already have an account? <a href="login.php">Login here</a></p>    
             </td>
         </tr>
   </table>
