@@ -45,17 +45,18 @@ include 'header.php';
                         <tr>
                             <td width="150"><label>Password</label></td>
                             <td><input type="password" name="password"></td>
-                            <td><p style = 'color: red'>*</p></td>
+                            <td><p style = 'color: red' >*</p></td>
                         </tr>
-                        
+                       
                         <tr>
                             <td width="150"></td>
-                            <td><input type="submit" name="submit" value="Register"></td>
+                            <td><input type="submit" name="submit" value="Register" style="margin-top:20px;"></td>
                         </tr>
 
 
                     </table>
                 </form>
+                <p style="margin-top: 10px;text-align: center;">Already have an account? <a href="login.php">Login here</a></p>
             </td>
         </tr>
     </table>
