@@ -19,9 +19,26 @@ include 'header.php';
         <tr>
             <td>
                 <form action="../controllers/LoginController.php" method="POST">
-                    <table class="form-table">
+                    <table class="form-table"style="margin-top:10px;">
 
+                        <tr>
+                            <td width="150"><label>Email</label></td>
+                            <td><input type="email" name="email" required></td>
+                        </tr>
 
+                         <tr>
+                            <td width="150"><label>Password</label></td>
+                            <td><input type="password" name="password" required></td>
+                        </tr>
+
+                        <tr>
+                            <td><label><input type="checkbox" name="remember"> Remember Me</label></td>
+                        </tr>
+
+                        <tr>
+                            <td width="150"></td>
+                            <td><input type="submit" name="submit" value="Log In" style="margin-top:20px;"></td>
+                        </tr>
 
 
                     </table>
