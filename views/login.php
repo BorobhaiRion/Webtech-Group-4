@@ -3,13 +3,6 @@ include '../config/helpers.php';
 include 'header.php';
 ?>
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Log in Form</title>
-    </head>
-<body>
-
 <div class="auth-form" style="max-width: 500px; margin: 20px auto;">
     <table class="layout-table">
         
@@ -48,8 +41,6 @@ include 'header.php';
         </tr>
     </table>
 </div>
-<body>
-</html>
 
 
 <?php include 'footer.php'; ?>
