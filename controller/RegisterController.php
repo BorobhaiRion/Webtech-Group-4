@@ -26,6 +26,25 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
         $errors[] = "Password must be at least 8 characters";
     }
 
+    if(empty($errors)){
+        $db = new db();
+
+        if($db->getUserByEmail($email)){
+            setFlash('error', "Email already registered");
+            redirect('../views/register.php');
+        } 
+        else{
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            
+            if($db->registerUser($name, $email, $phone, $hashedPassword)){
+                setFlash('success', "Registration successful. Please login.");
+                redirect('../views/login.php');
+            } 
+            else{
+                setFlash('error', "Registration failed. Try again.");
+                redirect('../views/register.php');
+            }
+        }      
         
 
 }
