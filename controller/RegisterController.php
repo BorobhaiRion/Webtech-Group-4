@@ -12,10 +12,22 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
     $email = validateInput($_POST["email"]);
     $phone = validateInput($_POST["phone"]);
     $password = $_POST["password"];
+    $errors = [];
 
+    if (empty($name)){
+        $errors[] = "Name is required";
+    } 
 
-
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $errors[] = "Invalid email format";
+    } 
     
+    if (strlen($password) < 8){
+        $errors[] = "Password must be at least 8 characters";
+    }
+
+        
+
 }
 else{
         setFlash('error', implode("<br>", $errors));
