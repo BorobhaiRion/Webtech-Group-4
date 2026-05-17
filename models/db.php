@@ -102,5 +102,46 @@ class db {
         return $result;
     }
 
+    
+    public function createOrder($user_id, $total, $address, $method) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("INSERT INTO orders (user_id, total_amount, shipping_address, payment_method) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("idss", $user_id, $total, $address, $method);
+        $result = $stmt->execute();
+        $order_id = $conn->insert_id;
+        $stmt->close();
+        $conn->close();
+        return $result ? $order_id : false;
+    }
+
+    public function addOrderItem($order_id, $product_id, $qty, $price) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiid", $order_id, $product_id, $qty, $price);
+        $result = $stmt->execute();
+        
+        // Decrement stock
+        $stmt2 = $conn->prepare("UPDATE products SET stock_qty = stock_qty - ? WHERE id = ?");
+        $stmt2->bind_param("ii", $qty, $product_id);
+        $stmt2->execute();
+        
+        $stmt->close();
+        $stmt2->close();
+        $conn->close();
+        return $result;
+    }
+
+    public function getUserOrders($user_id) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $orders = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        $conn->close();
+        return $orders;
+    }
+
 }
 ?>
