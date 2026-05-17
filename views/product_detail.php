@@ -33,7 +33,7 @@ if (!$product) {
 
 <div class="reviews-section">
     <h3>Reviews</h3>
-    
+    <!-- Review list and form logic would go here -->
     <p>No reviews yet.</p>
 </div>
 

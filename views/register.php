@@ -3,14 +3,6 @@ include '../config/helpers.php';
 include 'header.php';
 ?>
 
-
-
-
-
-
-
-
-<?php include 'footer.php'; ?>
 <div class="auth-form" style="max-width: 500px; margin: 20px auto;">
     <table class="layout-table">
         <tr>
