@@ -9,9 +9,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'];
 
     $errors = [];
-    if (empty($name)) $errors[] = "Name is required";
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Invalid email format";
-    if (strlen($password) < 8) $errors[] = "Password must be at least 8 characters";
+    if (empty($name)){
+        $errors[] = "Name is required";
+    }  
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $errors[] = "Invalid email format";
+    }
+    if (strlen($password) < 8){
+        $errors[] = "Password must be at least 8 characters";
+    }
 
     if (empty($errors)) {
         $db = new db();
@@ -23,12 +29,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($db->registerUser($name, $email, $phone, $hashedPassword)) {
                 setFlash('success', "Registration successful. Please login.");
                 redirect('../views/login.php');
-            } else {
+            } 
+            else {
                 setFlash('error', "Registration failed. Try again.");
                 redirect('../views/register.php');
             }
         }
-    } else {
+    } 
+    else {
         setFlash('error', implode("<br>", $errors));
         redirect('../views/register.php');
     }
