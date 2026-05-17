@@ -12,6 +12,67 @@ class db {
         }
         return $conn;
     }
+    public function registerUser($name, $email, $phone, $password_hash, $role = 'customer') {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssss", $name, $email, $phone, $password_hash, $role);
+        $result = $stmt->execute();
+        $stmt->close();
+        $conn->close();
+        return $result;
+    }
+    public function getUserByEmail($email) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        $conn->close();
+        return $user;
+    }
+
+    public function getUserById($id) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        $conn->close();
+        return $user;
+    }
+    public function updateUserProfile($id, $name, $email, $phone, $addresses) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("UPDATE users SET name = ?, email = ?, phone = ?, shipping_addresses = ? WHERE id = ?");
+        $stmt->bind_param("ssssi", $name, $email, $phone, $addresses, $id);
+        $result = $stmt->execute();
+        $stmt->close();
+        $conn->close();
+        return $result;
+    }
+
+    public function updatePassword($id, $new_hash) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        $stmt->bind_param("si", $new_hash, $id);
+        $result = $stmt->execute();
+        $stmt->close();
+        $conn->close();
+        return $result;
+    }
+
+    public function updateRememberToken($id, $token) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("UPDATE users SET remember_token = ? WHERE id = ?");
+        $stmt->bind_param("si", $token, $id);
+        $result = $stmt->execute();
+        $stmt->close();
+        $conn->close();
+        return $result;
+    }
     
     public function updateProductAvailability($id, $status) {
         $conn = $this->connection();
