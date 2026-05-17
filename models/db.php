@@ -13,6 +13,50 @@ class db {
         return $conn;
     }
     
+     // Category methods
+    public function getAllCategories() {
+        $conn = $this->connection();
+        $result = $conn->query("SELECT * FROM categories");
+        $categories = $result->fetch_all(MYSQLI_ASSOC);
+        $conn->close();
+        return $categories;
+    }
+
+// Product methods
+    public function getAllProducts($filters = []) {
+        $conn = $this->connection();
+        $sql = "SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE 1=1";
+        
+        if (!isset($filters['show_unavailable']) || !$filters['show_unavailable']) {
+            $sql .= " AND p.is_available = 1";
+        }
+        
+        if (!empty($filters['category_id'])) {
+            $sql .= " AND p.category_id = " . intval($filters['category_id']);
+        }
+        if (!empty($filters['search'])) {
+            $sql .= " AND p.name LIKE '%" . $conn->real_escape_string($filters['search']) . "%'";
+        }
+        
+        $result = $conn->query($sql);
+        $products = $result->fetch_all(MYSQLI_ASSOC);
+        $conn->close();
+        return $products;
+    }
+
+    
+    public function getProductById($id) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $product = $result->fetch_assoc();
+        $stmt->close();
+        $conn->close();
+        return $product;
+    }
+
     public function updateProductAvailability($id, $status) {
         $conn = $this->connection();
         $stmt = $conn->prepare("UPDATE products SET is_available = ? WHERE id = ?");
@@ -50,7 +94,6 @@ class db {
 
     public function deleteProduct($id) {
         $conn = $this->connection();
-        // Check if product has order items
         $stmt = $conn->prepare("SELECT COUNT(*) as count FROM order_items WHERE product_id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -87,7 +130,6 @@ class db {
 
     public function deleteCategory($id) {
         $conn = $this->connection();
-        // Check if category has products
         $stmt = $conn->prepare("SELECT COUNT(*) as count FROM products WHERE category_id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
