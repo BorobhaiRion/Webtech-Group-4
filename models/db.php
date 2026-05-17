@@ -12,6 +12,8 @@ class db {
         }
         return $conn;
     }
+
+    // Auth methods
     public function registerUser($name, $email, $phone, $password_hash, $role = 'customer') {
         $conn = $this->connection();
         $stmt = $conn->prepare("INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)");
@@ -21,6 +23,7 @@ class db {
         $conn->close();
         return $result;
     }
+
     public function getUserByEmail($email) {
         $conn = $this->connection();
         $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
@@ -44,6 +47,7 @@ class db {
         $conn->close();
         return $user;
     }
+
     public function updateUserProfile($id, $name, $email, $phone, $addresses) {
         $conn = $this->connection();
         $stmt = $conn->prepare("UPDATE users SET name = ?, email = ?, phone = ?, shipping_addresses = ? WHERE id = ?");
@@ -73,7 +77,50 @@ class db {
         $conn->close();
         return $result;
     }
-    
+
+    // Category methods
+    public function getAllCategories() {
+        $conn = $this->connection();
+        $result = $conn->query("SELECT * FROM categories");
+        $categories = $result->fetch_all(MYSQLI_ASSOC);
+        $conn->close();
+        return $categories;
+    }
+
+    // Product methods
+    public function getAllProducts($filters = []) {
+        $conn = $this->connection();
+        $sql = "SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE 1=1";
+        
+        if (!isset($filters['show_unavailable']) || !$filters['show_unavailable']) {
+            $sql .= " AND p.is_available = 1";
+        }
+        
+        if (!empty($filters['category_id'])) {
+            $sql .= " AND p.category_id = " . intval($filters['category_id']);
+        }
+        if (!empty($filters['search'])) {
+            $sql .= " AND p.name LIKE '%" . $conn->real_escape_string($filters['search']) . "%'";
+        }
+        
+        $result = $conn->query($sql);
+        $products = $result->fetch_all(MYSQLI_ASSOC);
+        $conn->close();
+        return $products;
+    }
+
+    public function getProductById($id) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $product = $result->fetch_assoc();
+        $stmt->close();
+        $conn->close();
+        return $product;
+    }
+
     public function updateProductAvailability($id, $status) {
         $conn = $this->connection();
         $stmt = $conn->prepare("UPDATE products SET is_available = ? WHERE id = ?");
@@ -126,6 +173,7 @@ class db {
         return $result;
     }
 
+    // Category CRUD
     public function addCategory($name, $parent_id = null) {
         $conn = $this->connection();
         $stmt = $conn->prepare("INSERT INTO categories (name, parent_id) VALUES (?, ?)");
@@ -163,5 +211,56 @@ class db {
         return $result;
     }
 
+    public function getCategoryById($id) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("SELECT * FROM categories WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $category = $result->fetch_assoc();
+        $stmt->close();
+        $conn->close();
+        return $category;
+    }
+
+    public function createOrder($user_id, $total, $address, $method) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("INSERT INTO orders (user_id, total_amount, shipping_address, payment_method) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("idss", $user_id, $total, $address, $method);
+        $result = $stmt->execute();
+        $order_id = $conn->insert_id;
+        $stmt->close();
+        $conn->close();
+        return $result ? $order_id : false;
+    }
+
+    public function addOrderItem($order_id, $product_id, $qty, $price) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiid", $order_id, $product_id, $qty, $price);
+        $result = $stmt->execute();
+        
+        // Decrement stock
+        $stmt2 = $conn->prepare("UPDATE products SET stock_qty = stock_qty - ? WHERE id = ?");
+        $stmt2->bind_param("ii", $qty, $product_id);
+        $stmt2->execute();
+        
+        $stmt->close();
+        $stmt2->close();
+        $conn->close();
+        return $result;
+    }
+
+    public function getUserOrders($user_id) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $orders = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        $conn->close();
+        return $orders;
+    }
 }
 ?>
