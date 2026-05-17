@@ -184,6 +184,45 @@ class db {
         return $result;
     }
 
+    public function updateCategory($id, $name, $parent_id = null) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("UPDATE categories SET name = ?, parent_id = ? WHERE id = ?");
+        $stmt->bind_param("sii", $name, $parent_id, $id);
+        $result = $stmt->execute();
+        $stmt->close();
+        $conn->close();
+        return $result;
+    }
+
+    public function deleteCategory($id) {
+        $conn = $this->connection();
+        // Check if category has products
+        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM products WHERE category_id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $res = $stmt->get_result()->fetch_assoc();
+        if ($res['count'] > 0) return false;
+
+        $stmt = $conn->prepare("DELETE FROM categories WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $result = $stmt->execute();
+        $stmt->close();
+        $conn->close();
+        return $result;
+    }
+
+    public function getCategoryById($id) {
+        $conn = $this->connection();
+        $stmt = $conn->prepare("SELECT * FROM categories WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $category = $result->fetch_assoc();
+        $stmt->close();
+        $conn->close();
+        return $category;
+    }
+
     public function createOrder($user_id, $total, $address, $method) {
         $conn = $this->connection();
         $stmt = $conn->prepare("INSERT INTO orders (user_id, total_amount, shipping_address, payment_method) VALUES (?, ?, ?, ?)");
@@ -225,4 +264,3 @@ class db {
     }
 }
 ?>
-
