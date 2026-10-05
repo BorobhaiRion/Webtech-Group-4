@@ -201,6 +201,7 @@ See [`schema.sql`](./schema.sql) for the full DDL.
 - **ZarinAnjum** — Admin dashboard, product & category management, availability toggle, API endpoints
 - **BorobhaiRion / Borobhai_rion** — User authentication (login/register), profile management, logout, helpers, DB model
 - **Musfiq** — E-commerce features, integration, merge management
+- **Asfaq Ahmed** — Controller implementation (login/register), views(registration,profile,logout & login, database model, and helpers
 
 ---
 
